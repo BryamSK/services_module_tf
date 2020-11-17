@@ -1,23 +1,6 @@
 # ---------------------------------------------------------------------------------------------------------------------
-# CREATE THE cluster
+# CREATE THE ROL
 # ---------------------------------------------------------------------------------------------------------------------
-
-resource "aws_ecs_cluster" "main" {
-  name = "${var.project_name}-cluster"
-}
-
-data "template_file" "myapp" {
-  template = file(var.template)
-  vars = {
-    app_image      = var.app_image
-    app_port       = var.app_port
-    fargate_cpu    = "1024"
-    fargate_memory = "2048"
-    region         = var.aws_region
-    environment    = var.environment
-  }
-}
-
 data "aws_iam_policy_document" "ecs_task_execution_role" {
   version = "2012-10-17"
   statement {
@@ -26,8 +9,8 @@ data "aws_iam_policy_document" "ecs_task_execution_role" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type        = "SERVICE"
-      identifiers = ["${var.project_name}-ecs-tasks.amazonaws.com"]
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }
 }
@@ -42,8 +25,25 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# ---------------------------------------------------------------------------------------------------------------------
+# CREATE THE cluster
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_ecs_cluster" "main" {
+  name = "${var.project_name}-cluster"
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# CREATE THE template_file
+# ---------------------------------------------------------------------------------------------------------------------
+
+data "template_file" "myapp" {
+  template = file(var.template)
+  vars = var.vars_template
+}
+
 resource "aws_ecs_task_definition" "app" {
-  family                   = "prueba-task-dev"
+  family                   = "${var.project_name}-${var.environment}"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -71,5 +71,5 @@ resource "aws_ecs_service" "main" {
     container_port   = 80
   }
 
-  #depends_on = [aws_alb_listener.front_end, aws_iam_role_policy_attachment.ecs_task_execution_role]
+  depends_on = [var.alb_frontend_id, aws_iam_role_policy_attachment.ecs_task_execution_role]
 }

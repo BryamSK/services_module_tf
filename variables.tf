@@ -10,14 +10,6 @@ variable "environment" {
   description = "The name to use for tags"
   type        = string
 }
-variable "app_image" {
-  description = "The name to use for tags"
-  type        = string
-}
-variable "app_port" {
-  description = "The name to use for tags"
-  type        = number
-}
 variable "security_groups" {
   description = "The name to use for tags"
 }
@@ -28,5 +20,14 @@ variable "targetGroup_id" {
   description = "The name to use for tags"
 }
 variable "template" {
+  description = "The name to use for tags"
+}
+variable "vars_template" {
+  description = "The name to use for tags"
+}
+variable "elb_id" {
+  description = "The name to use for tags"
+}
+variable "alb_frontend_id" {
   description = "The name to use for tags"
 }
