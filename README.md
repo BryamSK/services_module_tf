@@ -1,4 +1,8 @@
 # Services_module_tf
+Modulo para servicio ECS Fargate-Docker
+
+## Ultima Version estable
+v0.0.1
 
 ```
 module "services_module" {
